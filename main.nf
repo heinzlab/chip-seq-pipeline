@@ -23,8 +23,8 @@ def helpMessage() {
 	 --reads                       Path to input data (must be surrounded with quotes).
 	 --genome                      Name of iGenomes reference.
 
-        Options:
-         --singleEnd                   Specifies that the input is single end reads.
+	Options:
+	 --singleEnd                   Specifies that the input is single end reads.
 
 	Trimming options:
 	 --length [int]                Discard reads that became shorter than length [int] because of either quality or adapter trimming. Default: 18
@@ -36,8 +36,8 @@ def helpMessage() {
 
 	References:
 	 --saveReference               Save the generated reference files the the Results directory.
-         --saveAlignedIntermediates    Save the intermediate BAM files from the Alignment step prior to sorting - not done by default.
-         --fasta                       Path to fasta reference.
+	 --saveAlignedIntermediates    Save the intermediate BAM files from the Alignment step prior to sorting - not done by default.
+	 --fasta                       Path to fasta reference.
 	""".stripIndent()
 }
 
@@ -218,59 +218,6 @@ process bwa {
 }
 
 /*
- * STEP 3.2 - post-alignment processing
- */
-
-process samtools {
-    tag "${bam.baseName}"
-    publishDir path: "${params.outdir}/bwa", mode: 'copy',
-               saveAs: { filename ->
-                   if (filename.indexOf(".stats.txt") > 0) "stats/$filename"
-                   else params.saveAlignedIntermediates ? filename : null
-               }
-
-    input:
-    file bam from bwa_bam
-
-    output:
-    file '*.sorted.bam' into bam_picard, bam_for_mapped
-    file '*.sorted.bam.bai' into bwa_bai, bai_for_mapped
-    file '*.sorted.bed' into bed_total
-    file '*.stats.txt' into samtools_stats
-
-    script:
-    """
-    samtools sort $bam -o ${bam.baseName}.sorted.bam
-    samtools index ${bam.baseName}.sorted.bam
-    bedtools bamtobed -i ${bam.baseName}.sorted.bam | sort -k 1,1 -k 2,2n -k 3,3n -k 6,6 > ${bam.baseName}.sorted.bed
-    samtools stats ${bam.baseName}.sorted.bam > ${bam.baseName}.stats.txt
-    """
-}
-
-
-/*
- * STEP 3.3 - Statistics about mapped and unmapped reads against ref genome
- */
-
-process bwa_mapped {
-    tag "${input_files[0].baseName}"
-    publishDir "${params.outdir}/bwa/mapped", mode: 'copy'
-
-    input:
-    file input_files from bam_for_mapped.collect()
-    file bai from bai_for_mapped.collect()
-
-    output:
-    file 'mapped_refgenome.txt' into bwa_mapped
-
-    script:
-    """
-    for i in $input_files
-    do
-      samtools idxstats \${i} | awk -v filename="\${i}" '{mapped+=\$3; unmapped+=\$4} END {print filename,"\t",mapped,"\t",unmapped}'
-    done > mapped_refgenome.txt
-    """
-}/*
  * STEP 3.2 - post-alignment processing
  */
 
