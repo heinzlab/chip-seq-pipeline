@@ -78,6 +78,11 @@ if( params.bwa_index ){
     exit 1, "No reference genome specified!"
 }
 
+custom_runName = params.name
+if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
+  custom_runName = workflow.runName
+}
+
 // Create a channel for input reads
 if(params.readPaths){
     if(params.singleEnd){
