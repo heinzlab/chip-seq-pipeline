@@ -82,3 +82,25 @@ conda install --yes -c bioconda nextflow
 ```
 nextflow run heinzlab/chip-seq-pipeline --reads '/path/to/reads/*.fastq.gz' --genome your_genome --singleEnd -c your_config_file.txt
 ```
+
+## Cluster Environment
+By default, pipeline uses the `local` Nextflow executor - in other words, all jobs are run in the login session. If you're using a simple server, this may be fine. If you're using a compute cluster, this is bad as all jobs will run on the head node.
+
+To specify your cluster environment, add the following line to your config file:
+
+```groovy
+process {
+  executor = 'YOUR_SYSTEM_TYPE'
+}
+```
+
+Many different cluster types are supported by Nextflow. For more information, please see the [Nextflow documentation](https://www.nextflow.io/docs/latest/executor.html).
+
+Note that you may need to specify cluster options, such as a project or queue. To do so, use the `clusterOptions` config option:
+
+```groovy
+process {
+  executor = 'SLURM'
+  clusterOptions = '-A myproject'
+}
+```
