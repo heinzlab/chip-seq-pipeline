@@ -25,6 +25,7 @@ def helpMessage() {
 
 	Options:
 	 --singleEnd                   Specifies that the input is single end reads.
+	 --allow_multi_align           Secondary alignments and unmapped reads are also reported in addition to primary alignments.
 
 	Trimming options:
 	 --length [int]                Discard reads that became shorter than length [int] because of either quality or adapter trimming. Default: 18
@@ -98,7 +99,7 @@ if(params.readPaths){
 
 // Header log info
 log.info """=======================================================
-smRNA-seq pipeline - svenner lab
+ChIP-seq pipeline - svenner lab
 ======================================================="""
 def summary = [:]
 summary['Reads']               = params.reads
@@ -214,7 +215,7 @@ process bwa {
     prefix = reads[0].toString() - ~/(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     filtering = params.allow_multi_align ? '' : "| samtools view -b -q 1 -F 4 -F 256"
     """
-    bwa mem -M ${index}/genome.fa $reads | samtools view -bT $index - $filtering > ${prefix}.bam
+    bwa mem -t 8 -M ${index}/genome.fa $reads | samtools view -bT $index - $filtering > ${prefix}.bam
     """
 }
 
@@ -270,5 +271,72 @@ process bwa_mapped {
     do
       samtools idxstats \${i} | awk -v filename="\${i}" '{mapped+=\$3; unmapped+=\$4} END {print filename,"\t",mapped,"\t",unmapped}'
     done > mapped_refgenome.txt
+    """
+}
+
+/*
+ * STEP 4 Picard
+ */
+
+process picard {
+    tag "$prefix"
+    publishDir "${params.outdir}/picard", mode: 'copy'
+
+    input:
+    file bam from bam_picard
+
+    output:
+    file '*.dedup.sorted.bam' into bam_dedup_spp, bam_dedup_ngsplot, bam_dedup_deepTools, bam_dedup_macs, bam_dedup_saturation
+    file '*.dedup.sorted.bam.bai' into bai_dedup_deepTools, bai_dedup_ngsplot, bai_dedup_macs, bai_dedup_saturation
+    file '*.dedup.sorted.bed' into bed_dedup
+    file '*.picardDupMetrics.txt' into picard_reports
+
+    script:
+    prefix = bam[0].toString() - ~/(\.sorted)?(\.bam)?$/
+    if( task.memory == null ){
+        log.warn "[Picard MarkDuplicates] Available memory not known - defaulting to 6GB ($prefix)"
+        avail_mem = 6000
+    } else {
+        avail_mem = task.memory.toMega()
+        if( avail_mem <= 0){
+            avail_mem = 6000
+            log.warn "[Picard MarkDuplicates] Available memory 0 - defaulting to 6GB ($prefix)"
+        } else if( avail_mem < 250){
+            avail_mem = 250
+            log.warn "[Picard MarkDuplicates] Available memory under 250MB - defaulting to 250MB ($prefix)"
+        }
+    }
+    """
+    picard MarkDuplicates \\
+        INPUT=$bam \\
+        OUTPUT=${prefix}.dedup.bam \\
+        ASSUME_SORTED=true \\
+        REMOVE_DUPLICATES=true \\
+        METRICS_FILE=${prefix}.picardDupMetrics.txt \\
+        VALIDATION_STRINGENCY=LENIENT \\
+        PROGRAM_RECORD_ID='null'
+    samtools sort ${prefix}.dedup.bam -o ${prefix}.dedup.sorted.bam
+    samtools index ${prefix}.dedup.sorted.bam
+    bedtools bamtobed -i ${prefix}.dedup.sorted.bam | sort -k 1,1 -k 2,2n -k 3,3n -k 6,6 > ${prefix}.dedup.sorted.bed
+    """
+}
+
+/*
+ * STEP 5 Read_count_statistics
+ */
+
+process countstat {
+    tag "${input[0].baseName}"
+    publishDir "${params.outdir}/countstat", mode: 'copy'
+
+    input:
+    file input from bed_total.mix(bed_dedup).toSortedList()
+
+    output:
+    file 'read_count_statistics.txt' into countstat_results
+
+    script:
+    """
+    countstat.pl $input
     """
 }
