@@ -55,8 +55,10 @@ params.gtf = params.genome ? params.genomes[ params.genome ].gtf ?: false : fals
 params.bwa_index = params.genome ? params.genomes[ params.genome ].bwa ?: false : false
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.adapters = params.genome ? params.genomes[ params.genome ].adapters ?: false: false
+params.chrom_sizes = params.genome ? params.genomes[ params.genome ].chrom_sizes ?: false : false
 
 multiqc_config = file(params.multiqc_config)
+chrom_sizes = file(params.chrom_sizes)
 
 // Validate inputs
 if( params.adapters ){
@@ -110,6 +112,7 @@ log.info """=======================================================
 ChIP-seq pipeline - svenner lab
 ======================================================="""
 def summary = [:]
+summary['Run Name']            = custom_runName ?: workflow.runName
 summary['Reads']               = params.reads
 summary['Genome']              = params.genome
 summary['Data Type']           = params.singleEnd ? 'Single-End' : 'Paired-End'
@@ -117,7 +120,8 @@ summary['Trim Min Length']     = params.length
 if(params.bwa_index)           summary['BWA Index'] = params.bwa_index
 else if(params.fasta)          summary['Fasta Ref'] = params.fasta
 if(params.gtf)                 summary['GTF Annotation'] = params.gtf
-summary['adapters']            = params.adapters
+summary['Adapters']            = params.adapters
+summary['Chrom Sizes']         = params.chrom_sizes
 summary['Multiple alignments'] = params.allow_multi_align
 summary['Extend Reads']        = "$params.extendReadsLen bp"
 summary['Output dir']          = params.outdir
@@ -296,8 +300,8 @@ process picard {
     file bam from bam_picard
 
     output:
-    file '*.dedup.sorted.bam' into bam_dedup_spp, bam_dedup_ngsplot, bam_dedup_deepTools, bam_dedup_macs, bam_dedup_saturation
-    file '*.dedup.sorted.bam.bai' into bai_dedup_deepTools, bai_dedup_ngsplot, bai_dedup_macs, bai_dedup_saturation
+    file '*.dedup.sorted.bam' into bam_dedup_ssp, bam_dedup_ngsplot, bam_dedup_deepTools, bam_dedup_macs, bam_dedup_saturation
+    file '*.dedup.sorted.bam.bai' into bai_dedup_deepTools, bai_dedup_ngsplot, bai_dedup_macs, bai_dedup_ssp
     file '*.dedup.sorted.bed' into bed_dedup
     file '*.picardDupMetrics.txt' into picard_reports
 
@@ -352,7 +356,36 @@ process countstat {
 }
 
 /*
- * STEP 6 deeptools quality metrics
+ * STEP 6 ssp quality metrics
+ */
+
+process ssp {
+    tag "${bam[0].baseName}"
+    publishDir "${params.outdir}/ssp", mode: "copy"
+
+    input:
+    file bam from bam_dedup_ssp.collect()
+    file bai from bai_dedup_ssp.collect()
+    file chrom_sizes
+
+    output:
+    file '*.{txt,pdf}' into ssp_results
+
+    script:
+    prefix = bam[0].toString() - ~/(\.sorted)?(\.bam)?$/
+    if (!params.singleEnd) {
+        """
+        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2 --odir ./results/ssp --pair
+        """
+    } else {
+        """
+        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2 --odir ./results/ssp
+        """
+    }
+}
+
+/*
+ * STEP 7 deeptools quality metrics
  */
 
 process deepTools {
