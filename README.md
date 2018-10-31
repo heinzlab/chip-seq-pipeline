@@ -14,7 +14,11 @@ This pipeline can be run on any Unix based environment that has Nextflow install
 
 ## Installation
 ### NextFlow installation
-See https://github.com/SciLifeLab/NGI-NextflowDocs for instructions on how to install and configure Nextflow.
+See https://github.com/SciLifeLab/NGI-NextflowDocs for instructions on how to install and configure Nextflow. The easiest method involves using Anaconda (https://www.anaconda.com/).
+
+```
+conda install -c bioconda nextflow
+```
 
 ### Singularity installation
 Singularity is a container technology similar to Docker that has become popular for use on HPCs to handle multiple software dependencies. Admin assistance might be required for installation if your cluster does not already support Singularity containerization.
@@ -24,19 +28,19 @@ See https://singularity.lbl.gov/ for instructions on how to install Singularity.
 See https://singularity.lbl.gov/install-request for information on how to request for Singularity to be installed on your university's HPC if not already available.
 
 ### Pipeline installation
-This pipeline itself needs no installation - NextFlow will automatically fetch it from GitHub when `heinzlab/smrna-seq-pipeline` is specified as the pipeline name.
+This pipeline itself needs no installation - NextFlow will automatically fetch it from GitHub when `heinzlab/chip-seq-pipeline` is specified as the pipeline name.
 
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 
 ```
-nextflow run heinzlab/smrna-seq-pipeline --reads '*.fastq.gz' --genome hg38
+nextflow run heinzlab/chip-seq-pipeline --reads '*.fastq.gz' --genome hg38
 ```
 
 Information regarding the mandatory and optional parameters available can be found as follows:
 
 ```
-nextflow run heinzlab/smrna-seq-pipeline --help
+nextflow run heinzlab/chip-seq-pipeline --help
 ```
 
 The following files will be created in the directory the pipeline is run:
@@ -55,3 +59,26 @@ The following genomes are available:
 * Ensembl GRCh37 (--genome GRCh37)
 * Ensembl GRCm38 (--genome GRCm38)
 * Ensembl Rnor_6.0 (--genome Rnor_6.0)
+
+## Setting up and running the pipeline tutorial
+Step by step guide to setting up and running the pipeline.
+
+1. Install Anaconda (https://www.anaconda.com/download/).
+
+2. Install Nextflow:
+
+```
+conda install --yes -c bioconda nextflow
+```
+
+3. Download and unzip references from igenomes (https://support.illumina.com/sequencing/sequencing_software/igenome.html)
+
+4. Copy and paste the `conf/base.config` file at https://github.com/heinzlab/chip-seq-pipeline/blob/master/conf/base.config into a text editor and edit the `igenomes_base` parameter at the bottom to the path that holds your igenome files. Name it whatever you want.
+
+5. Set up cluster environment config file if running on a cluster (see section below).
+
+6. Run the pipeline:
+
+```
+nextflow run heinzlab/chip-seq-pipeline --reads '/path/to/reads/*.fastq.gz' --genome your_genome --singleEnd -c your_config_file.txt
+```
