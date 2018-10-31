@@ -379,8 +379,8 @@ process deepTools {
             --numberOfSamples 50000 \\
             --binSize 500 \\
             --plotFileFormat pdf \\
-            --plotTitle "${bam.baseName} Fingerprints"
-            --outQualityMetrics ${bam.baseName}_fingerprints.metrics
+            --plotTitle "${bam.baseName} Fingerprints" \\
+            --outQualityMetrics ${bam.baseName}_fingerprints.metrics \\
             --smartLabels
         bamCoverage \\
            -b $bam \\
@@ -400,8 +400,8 @@ process deepTools {
             --numberOfSamples 50000 \\
             --binSize 500 \\
             --plotFileFormat pdf \\
-            --plotTitle "Fingerprints"
-            --outQualityMetrics ${bam.baseName}_fingerprints.metrics
+            --plotTitle "Fingerprints" \\
+            --outQualityMetrics ${bam.baseName}_fingerprints.metrics \\
             --smartLabels
         for bamfile in ${bam}
         do
