@@ -153,7 +153,7 @@ process fastqc {
     !params.skip_qc && !params.skip_fastqc
 
     input:
-    set val(name), file reads from raw_reads_fastqc
+    set val(name), file(reads) from raw_reads_fastqc
 
     output:
     file '*_fastqc.{zip,html}' into fastqc_results
@@ -173,7 +173,7 @@ process bbduk {
     publishDir "${params.outdir}/bbduk", mode: 'copy'
 
     input:
-    set val(name), file reads from raw_reads_bbduk
+    set val(name), file(reads) from raw_reads_bbduk
     file adapters from adapters
 
     output:
