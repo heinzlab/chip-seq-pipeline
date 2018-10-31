@@ -50,7 +50,7 @@ if (params.help){
 
 // Reference path configuration
 params.gtf = params.genome ? params.genomes[ params.genome ].gtf ?: false : false
-params.bwa_index = params.genome ? params.genomes[ params.genome ].bowtie2 ?: false : false
+params.bwa_index = params.genome ? params.genomes[ params.genome ].bwa ?: false : false
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.adapters = params.genome ? params.genomes[ params.genome ].adapters ?: false: false
 
