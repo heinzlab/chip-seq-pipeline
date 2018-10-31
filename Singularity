@@ -14,6 +14,9 @@ From: continuumio/miniconda3
 	export PATH
 
 %post
+    apt-get -y update
+    apt-get -y install build-essential libboost-all-dev libgsl-dev libz-dev
+
     /opt/conda/bin/conda env create -f /environment.yml
     /opt/conda/bin/conda clean -a
 
