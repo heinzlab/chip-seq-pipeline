@@ -369,17 +369,17 @@ process ssp {
     file chrom_sizes
 
     output:
-    file '*.{txt,pdf}' into ssp_results
+    file 'sspout/*.{txt,pdf}' into ssp_results
 
     script:
     prefix = bam[0].toString() - ~/(\.sorted)?(\.bam)?$/
     if (!params.singleEnd) {
         """
-        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2 --odir ./results/ssp --pair
+        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2 --pair
         """
     } else {
         """
-        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2 --odir ./results/ssp
+        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2
         """
     }
 }
