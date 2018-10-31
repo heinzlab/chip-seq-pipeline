@@ -1,0 +1,20 @@
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f environment.yml
+name: chipseq-0.1dev
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=2.7
+  - conda-forge::openjdk=8.0.144 # Needed for FastQC - conda build hangs without this
+  - fastqc=0.11.7
+  - bbmap=38.22
+  - samtools=1.8
+  - bowtie2=2.3.4.1
+  - bwa=0.7.17
+  - multiqc=1.5
+  - fastx_toolkit=0.0.14
+  - deeptools=3.0.2
+  - picard=2.18.7
+  - bedtools=2.27.1
