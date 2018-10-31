@@ -56,6 +56,8 @@ params.bwa_index = params.genome ? params.genomes[ params.genome ].bwa ?: false 
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.adapters = params.genome ? params.genomes[ params.genome ].adapters ?: false: false
 
+multiqc_config = file(params.multiqc_config)
+
 // Validate inputs
 if( params.adapters ){
 	adapters = file(params.adapters)
