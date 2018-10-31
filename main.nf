@@ -344,6 +344,10 @@ process countstat {
     """
 }
 
+/*
+ * STEP 6 deeptools quality metrics
+ */
+
 process deepTools {
     tag "${bam[0].baseName}"
     publishDir "${params.outdir}/deepTools", mode: 'copy'
@@ -353,7 +357,7 @@ process deepTools {
     file bai from bai_dedup_deepTools.collect()
 
     output:
-    file '*.{txt,pdf,png,npz,bw}' into deepTools_results
+    file '*.{txt,pdf,png,npz,bw,metrics}' into deepTools_results
     file '*.txt' into deepTools_multiqc
 
     script:
@@ -445,4 +449,34 @@ process deepTools {
             --outFileNameData pcaplot_multiBamSummary.txt
         """
     }
+}
+
+/*
+ * STEP 7 MultiQC
+ */
+
+process multiqc {
+    tag "$prefix"
+    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+
+    input:
+    file multiqc_config
+    file (fastqc:'fastqc/*') from fastqc_results.collect()
+    file ('samtools/*') from samtools_stats.collect()
+    file ('picard/*') from picard_reports.collect()
+    file ('deeptools/*') from deepTools_multiqc.collect()
+
+    output:
+    file '*multiqc_report.html' into multiqc_report
+    file '*_data' into multiqc_data
+    file '.command.err' into multiqc_stderr
+    val prefix into multiqc_prefix
+
+    script:
+    prefix = fastqc[0].toString() - '_fastqc.html' - 'fastqc/'
+    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
+    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    """
+    multiqc -f $rtitle $rfilename --config $multiqc_config . 2>&1
+    """
 }
