@@ -105,7 +105,7 @@ conda install --yes -c bioconda nextflow
 6. Run the pipeline:
 
 ```
-nextflow run heinzlab/chip-seq-pipeline --reads '/path/to/reads/*.fastq.gz' --genome your_genome --singleEnd -c your_config_file.txt --ansi
+nextflow run heinzlab/chip-seq-pipeline --reads '/path/to/reads/*.fastq.gz' --genome your_genome --singleEnd -c your_config_file.txt -ansi
 ```
 
 ## Cluster Environment

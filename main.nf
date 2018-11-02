@@ -391,6 +391,9 @@ process ssp {
     tag "${bam[0].baseName}"
     publishDir "${params.outdir}/ssp", mode: "copy"
 
+    when:
+    !params.skip_qc
+
     input:
     file bam from bam_dedup_ssp.collect()
     file bai from bai_dedup_ssp.collect()
@@ -425,7 +428,7 @@ process deepTools {
     file bai from bai_dedup_deepTools.collect()
 
     output:
-    file '*.{txt,pdf,png,npz,bw,metrics}' into deepTools_results
+    file '*.{txt,pdf,png,npz,bw}' into deepTools_results
     file '*.txt' into deepTools_multiqc
 
     script:
@@ -452,7 +455,7 @@ process deepTools {
             --binSize 500 \\
             --plotFileFormat pdf \\
             --plotTitle "${bam.baseName} Fingerprints" \\
-            --outQualityMetrics ${bam.baseName}_fingerprints.metrics \\
+            --outQualityMetrics ${bam.baseName}_fingerprints_metrics.txt \\
             --smartLabels
         bamCoverage \\
            -b $bam \\
@@ -473,7 +476,7 @@ process deepTools {
             --binSize 500 \\
             --plotFileFormat pdf \\
             --plotTitle "Fingerprints" \\
-            --outQualityMetrics ${bam.baseName}_fingerprints.metrics \\
+            --outQualityMetrics ${bam.baseName}_fingerprints_metrics.txt \\
             --smartLabels
         for bamfile in ${bam}
         do
