@@ -34,7 +34,7 @@ This pipeline itself needs no installation - NextFlow will automatically fetch i
 The typical command for running the pipeline is as follows:
 
 ```
-nextflow run heinzlab/chip-seq-pipeline --reads '*.fastq.gz' --genome hg38
+nextflow run heinzlab/chip-seq-pipeline --reads '*.fastq.gz' --genome hg38 --singleEnd -ansi
 ```
 
 Information regarding the mandatory and optional parameters available can be found as follows:
@@ -80,7 +80,7 @@ conda install --yes -c bioconda nextflow
 6. Run the pipeline:
 
 ```
-nextflow run heinzlab/chip-seq-pipeline --reads '/path/to/reads/*.fastq.gz' --genome your_genome --singleEnd -c your_config_file.txt
+nextflow run heinzlab/chip-seq-pipeline --reads '/path/to/reads/*.fastq.gz' --genome your_genome --singleEnd -c your_config_file.txt --ansi
 ```
 
 ## Cluster Environment

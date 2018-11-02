@@ -35,6 +35,7 @@ def helpMessage() {
 	 --outdir                      The output directory where the results will be saved. Default: results
 	 --skip_qc                     Skip all QC steps aside from MultiQC.
 	 --skip_fastqc                 Skip FastQC.
+	 --list_genomes                Similar to --help. Used to list all available genome keywords.
 
 	References:
 	 --saveReference               Save the generated reference files the the Results directory.
@@ -43,10 +44,37 @@ def helpMessage() {
 	""".stripIndent()
 }
 
+def genome_listMessage() {
+	log.info"""
+	==============================================
+	              Available Genomes
+	==============================================
+
+	Homo sapiens:
+	 hg38                          UCSC
+	 GRCh37                        Ensembl
+
+	Mus musculus:
+	 mm10                          UCSC
+	 GRCm38                        Ensembl
+
+	Rattus norvegicus:
+	 rn6                           UCSC
+	 Rnor_6.0                      Ensembl
+	""".stripIndent()
+}
+
 // Show help message
 params.help = false
 if (params.help){
 	helpMessage()
+	exit 0
+}
+
+// Show list of genomes
+params.list_genomes = false
+if (params.list_genomes){
+	genome_listMessage()
 	exit 0
 }
 
