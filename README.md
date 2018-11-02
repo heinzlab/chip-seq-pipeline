@@ -53,12 +53,37 @@ results         # Finished results for each sample, one directory per pipeline s
 ```
 
 ## Reference genomes available
-The following genomes are available:
+Specifying long paths every time you run the pipeline is a pain. To make this easier, the pipeline comes configured to understand reference genome keywords which correspond to preconfigured paths, meaning that you can just specify `--genome ID` when running the pipeline.
 
-* UCSC hg38 (--genome hg38)
-* Ensembl GRCh37 (--genome GRCh37)
-* Ensembl GRCm38 (--genome GRCm38)
-* Ensembl Rnor_6.0 (--genome Rnor_6.0)
+Note that this genome key can also be specified in a config file if you always use the same genome.
+
+To use this system, add paths to your config file using the following template:
+
+```groovy
+params {
+  genomes {
+    'YOUR-ID' {
+      bed12  = '<PATH TO BED FILE>/genes.bed'
+      fasta  = '<PATH TO FASTA FILE>/genome.fa'
+      gtf    = '<PATH TO GTF FILE>/genes.gtf'
+      star    = '<PATH TO STAR INDEX>/STARIndex/'
+    }
+    'OTHER-GENOME' {
+      // [..]
+    }
+  }
+  // Optional - default genome. Ignored if --genome 'OTHER-GENOME' specified on command line
+  genome = 'YOUR-ID'
+}
+```
+
+You can add as many genomes as you like as long as they have unique IDs.
+
+For those in the Heinz lab using the Marvin cluster, you can see the currently available genomes by doing the following:
+
+```
+nextflow run heinzlab/chip-seq-pipeline --list_genomes
+```
 
 ## Setting up and running the pipeline tutorial
 Step by step guide to setting up and running the pipeline.
