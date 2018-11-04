@@ -257,7 +257,7 @@ process bwa {
     prefix = reads[0].toString() - ~/(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     filtering = params.allow_multi_align ? '' : "| samtools view -b -q 1 -F 4 -F 256"
     """
-    bwa mem -t 8 -M ${index}/genome.fa $reads | samtools view -bT $index - $filtering > ${prefix}.bam
+    bwa mem -t ${task.cpus} -M ${index}/genome.fa $reads | samtools view -bT $index - $filtering > ${prefix}.bam
     """
 }
 
@@ -406,11 +406,11 @@ process ssp {
     prefix = bam[0].toString() - ~/(\.sorted)?(\.bam)?$/
     if (!params.singleEnd) {
         """
-        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2 --pair
+        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p ${task.cpus} --pair
         """
     } else {
         """
-        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p 2
+        ssp -i $bam -o ${prefix} --gt $chrom_sizes -p ${task.cpus}
         """
     }
 }
@@ -424,8 +424,8 @@ process deepTools {
     publishDir "${params.outdir}/deepTools", mode: 'copy'
 
     input:
-    file bam from bam_dedup_deepTools.toSortedList()
-    file bai from bai_dedup_deepTools.toSortedList()
+    file bam from bam_dedup_deepTools.collect()
+    file bai from bai_dedup_deepTools.collect()
 
     output:
     file '*.{txt,pdf,png,npz,bw}' into deepTools_results
@@ -456,11 +456,12 @@ process deepTools {
             --plotFileFormat pdf \\
             --plotTitle "${bam.baseName} Fingerprints" \\
             --outQualityMetrics ${bam.baseName}_fingerprints_metrics.txt \\
-            --smartLabels
+            -p ${task.cpus}
         bamCoverage \\
            -b $bam \\
            --extendReads ${params.extendReadsLen} \\
            --normalizeUsing RPKM \\
+           -p ${task.cpus} \\
            -o ${bam}.bw
         """
     } else {
@@ -477,13 +478,14 @@ process deepTools {
             --plotFileFormat pdf \\
             --plotTitle "Fingerprints" \\
             --outQualityMetrics all_fingerprints_metrics.txt \\
-            --smartLabels
+            -p ${task.cpus}
         for bamfile in ${bam}
         do
             bamCoverage \\
               -b \$bamfile \\
               --extendReads ${params.extendReadsLen} \\
               --normalizeUsing RPKM \\
+              -p ${task.cpus} \\
               -o \${bamfile}.bw
         done
         multiBamSummary \\
