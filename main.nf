@@ -476,7 +476,7 @@ process deepTools {
             --binSize 500 \\
             --plotFileFormat pdf \\
             --plotTitle "Fingerprints" \\
-            --outQualityMetrics ${bam.baseName}_fingerprints_metrics.txt \\
+            --outQualityMetrics all_fingerprints_metrics.txt \\
             --smartLabels
         for bamfile in ${bam}
         do
