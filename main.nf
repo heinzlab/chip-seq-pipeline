@@ -395,8 +395,8 @@ process ssp {
     !params.skip_qc
 
     input:
-    file bam from bam_dedup_ssp.collect()
-    file bai from bai_dedup_ssp.collect()
+    file bam from bam_dedup_ssp
+    file bai from bai_dedup_ssp
     file chrom_sizes
 
     output:
@@ -424,8 +424,8 @@ process deepTools {
     publishDir "${params.outdir}/deepTools", mode: 'copy'
 
     input:
-    file bam from bam_dedup_deepTools.collect()
-    file bai from bai_dedup_deepTools.collect()
+    file bam from bam_dedup_deepTools
+    file bai from bai_dedup_deepTools
 
     output:
     file '*.{txt,pdf,png,npz,bw}' into deepTools_results
