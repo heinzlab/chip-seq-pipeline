@@ -424,8 +424,8 @@ process deepTools {
     publishDir "${params.outdir}/deepTools", mode: 'copy'
 
     input:
-    file bam from bam_dedup_deepTools
-    file bai from bai_dedup_deepTools
+    file bam from bam_dedup_deepTools.toSortedList()
+    file bai from bai_dedup_deepTools.toSortedList()
 
     output:
     file '*.{txt,pdf,png,npz,bw}' into deepTools_results
