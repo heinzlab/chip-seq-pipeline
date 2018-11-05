@@ -446,15 +446,12 @@ process deepTools {
         """
         plotFingerprint \\
             -b $bam \\
-            --plotFile ${bam.baseName}_fingerprints.pdf \\
             --outRawCounts ${bam.baseName}_fingerprint.txt \\
             --extendReads ${params.extendReadsLen} \\
             --skipZeros \\
             --ignoreDuplicates \\
             --numberOfSamples 50000 \\
             --binSize 500 \\
-            --plotFileFormat pdf \\
-            --plotTitle "${bam.baseName} Fingerprints" \\
             --outQualityMetrics ${bam.baseName}_fingerprints_metrics.txt \\
             -p ${task.cpus}
         bamCoverage \\
@@ -468,16 +465,13 @@ process deepTools {
         """
         plotFingerprint \\
             -b $bam \\
-            --plotFile fingerprints.pdf \\
             --outRawCounts fingerprint.txt \\
             --extendReads ${params.extendReadsLen} \\
             --skipZeros \\
             --ignoreDuplicates \\
             --numberOfSamples 50000 \\
             --binSize 500 \\
-            --plotFileFormat pdf \\
-            --plotTitle "Fingerprints" \\
-            --outQualityMetrics all_fingerprints_metrics.txt \\
+            --outQualityMetrics all_fingerprint_metrics.txt \\
             -p ${task.cpus}
         for bamfile in ${bam}
         do
