@@ -11,6 +11,7 @@ This pipeline can be run on any Unix based environment that has Nextflow install
 * **README.md:** is what you are reading, which has a complete walkthrough of building and running the container.
 * **Singularity:** includes the build recipe for the main Singularity container. Can more or less be copied over for implementation of other genomics pipelines.
 * **nextflow.config:** the main nextflow config file with profile and default parameter information.
+* **environment.yml:** an anaconda environment file that contains dependency information.
 
 ## Installation
 ### NextFlow installation
